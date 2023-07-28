@@ -1,0 +1,7 @@
+{
+    "host": "hub-server-ip",
+    "port": 1266,
+    "download": "download",
+    "upload": "upload",
+    "hub_path": ["CommonModels", "triton-hub"]
+}

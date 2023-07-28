@@ -1,0 +1,79 @@
+
+#CUDA
+export LD_LIBRARY_PATH=$HOME/cuda-11.7/lib64:$LD_LIBRARY_PATH
+
+#NCCL
+# export NCCL_HOME=$HOME/tools/nccl-v2.9.9-1
+# export LD_LIBRARY_PATH=$NCCL_HOME/lib:$LD_LIBRARY_PATH
+
+
+# MAVEN
+export MAVEN_HOME=$HOME/tools/apache-maven-3.6.3
+export PATH=${MAVEN_HOME}/bin:$PATH
+
+#cmake
+export CMAKE_HOME=$HOME/tools/cmake-3.20.3
+export PATH=${CMAKE_HOME}/bin:$PATH
+
+#git
+export PATH=$HOME/tools/git-2.31.1/bin:${PATH}
+
+#ninja
+export PATH=$HOME/source_libs/ninja/build-cmake:$PATH
+export PATH=$HOME/source_libs/ninja:$PATH
+
+#bzip2
+export PATH=$HOME/tools/bzip2/bin:${PATH}
+
+#gcc
+export GCC_HOME=$HOME/tools/gcc-7.5.0
+export PATH=${GCC_HOME}/bin:$PATH
+export LD_LIBRARY_PATH=${GCC_HOME}/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=${GCC_HOME}/lib64:$LD_LIBRARY_PATH
+
+#spm
+export SPM_HOME=$HOME/tools/spm
+export PATH=${SPM_HOME}/bin:${PATH}
+export LD_LIBRARY_PATH=${SPM_HOME}/lib64:${LD_LIBRARY_PATH}
+
+#slurm
+export SLURM_HOME=$HOME/tools/slurm-20.11.8
+export PATH=${SLURM_HOME}/bin:$PATH
+
+#scala
+export SCALA_HOME=$HOME/tools/scala-2.12.14
+export PATH=${SCALA_HOME}/bin:${PATH}
+
+#java
+export JAVA_HOME=$HOME/tools/jdk-11
+export PATH=${JAVA_HOME}/bin:${PATH}
+
+#hadoop
+export HADOOP_HOME=$HOME/tools/hadoop-3.2.2
+export PATH=${HADOOP_HOME}/bin:${PATH}
+
+#spark
+export SPARK_HOME=$HOME/ext3/spark-3.1.2-bin-hadoop3.2
+export PATH=${SPARK_HOME}/bin:${PATH}
+
+# LINAIO
+LIBAIO_HOME=$HOME/tools/libaio
+#export CFLAGS=${LIBAIO_HOME}/include
+#export LDFLAGS=${LIBAIO_HOME}/lib
+#export LD_LIBRARY_PATH=${LIBAIO_HOME}/lib:${LD_LIBRARY_PATH}
+
+# OPENMPI
+export MPI_LOC=$HOME/tools/openmpi-4.1.1
+export MPI_LIB=$MPI_LOC/lib
+export MPILIB=$MPI_LOC/lib
+export MPI_INCLUDE=$MPI_LOC/include
+export LD_LIBRARY_PATH=$MPI_LOC/lib:$LD_LIBRARY_PATH
+export PATH=$MPI_LOC/bin:$PATH
+
+export PDSH_HOME=$HOME/tools/pdsh-2.34
+export PATH=$PDSH_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$PDSH_HOME/lib:$LD_LIBRARY_PATH
+
+# GO_HOME
+export GOROOT=$HOME/tools/go
+export PATH=$GOROOT/bin:$PATH

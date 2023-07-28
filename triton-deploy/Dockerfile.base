@@ -1,0 +1,61 @@
+
+ARG BASE_IMAGE=nvcr.io/nvidia/tritonserver:23.04-py3
+    
+FROM ${BASE_IMAGE}
+
+RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
+COPY ./resources/sources.list /etc/apt/
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        autoconf \
+        autogen \
+        clangd \
+        gdb \
+        git-lfs \
+        libb64-dev \
+        libz-dev \
+        locales-all \
+        mosh \
+        openssh-server \
+        python3-dev \
+        rapidjson-dev \
+        sudo \
+        tmux \
+        unzip \
+        zstd \
+        zip \
+        zsh \
+        python3-pip
+COPY ./resources/* /workspace/
+RUN pip3 install /workspace/torch-1.12.1+cu116-cp38-cp38-linux_x86_64.whl && \
+    pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple regex \
+                    fire tritonclient[all] && \
+    pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple transformers huggingface_hub tokenizers SentencePiece \
+                    sacrebleu datasets tqdm omegaconf rouge_score && \
+    pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple cmake==3.24.3 && \
+    pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple uvicorn fastapi openai
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /workspace/*.whl
+
+# backend build
+ADD . /workspace/build/fastertransformer_backend
+RUN mkdir -p /workspace/build/fastertransformer_backend/build
+WORKDIR /workspace/build/fastertransformer_backend/build
+RUN cmake \
+      -D CMAKE_EXPORT_COMPILE_COMMANDS=1 \
+      -D CMAKE_BUILD_TYPE=Release \
+      -D CMAKE_INSTALL_PREFIX=/opt/tritonserver \
+      -D TRITON_COMMON_REPO_TAG="r${NVIDIA_TRITON_SERVER_VERSION}" \
+      -D TRITON_CORE_REPO_TAG="r${NVIDIA_TRITON_SERVER_VERSION}" \
+      -D TRITON_BACKEND_REPO_TAG="r${NVIDIA_TRITON_SERVER_VERSION}" \
+      ..
+RUN make -j"$(grep -c ^processor /proc/cpuinfo)" install
+    
+ENV WORKSPACE /workspace
+WORKDIR /workspace       
+
+ENV NCCL_LAUNCH_MODE=PARALLEL
+RUN sed -i 's/#X11UseLocalhost yes/X11UseLocalhost no/g' /etc/ssh/sshd_config \
+    && mkdir /var/run/sshd -p
+    

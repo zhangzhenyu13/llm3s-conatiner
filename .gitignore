@@ -1,0 +1,5 @@
+data_dir
+data_dir_test
+trained_models
+*.pyc
+*.log

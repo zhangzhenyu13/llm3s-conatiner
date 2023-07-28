@@ -1,0 +1,6 @@
+{
+    "gui_web": 7680,
+    "gui_threads": 10,
+    "api": 7690,
+    "api_workers": 3
+}

@@ -1,0 +1,142 @@
+# Copyright (c) 2021-2022, NVIDIA CORPORATION. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+ARG TRITON_VERSION=22.12
+ARG BASE_IMAGE=nvcr.io/nvidia/tritonserver:${TRITON_VERSION}-py3
+FROM ${BASE_IMAGE}
+
+RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
+COPY ./docker/resource/sources.list /etc/apt/
+
+RUN rm -rf /etc/apt/sources.list.d/* && apt-get update
+RUN apt-get install -y --no-install-recommends \
+        autoconf \
+        autogen \
+        clangd \
+        gdb \
+        git-lfs \
+        libb64-dev \
+        libz-dev \
+        locales-all \
+        mosh \
+        openssh-server \
+        python3-dev \
+        rapidjson-dev \
+        sudo \
+        tmux \
+        unzip \
+        zstd \
+        zip \
+        zsh
+
+RUN ln -sv $(which pip3) /usr/bin/pip3.8
+COPY torch-1.12.1+cu116-cp38-cp38-linux_x86_64.whl /workspace
+RUN pip3 install /workspace/torch-1.12.1+cu116-cp38-cp38-linux_x86_64.whl && \
+    pip3 install regex fire tritonclient[all] -i https://pypi.tuna.tsinghua.edu.cn/simple && \
+    pip3 install transformers huggingface_hub tokenizers SentencePiece sacrebleu datasets tqdm omegaconf rouge_score -i https://pypi.tuna.tsinghua.edu.cn/simple && \
+    pip3 install cmake==3.24.3 -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* \
+    rm -rf /workspace/*.whl
+
+# backend build
+ADD . /workspace/build/fastertransformer_backend
+RUN mkdir -p /workspace/build/fastertransformer_backend/build
+
+WORKDIR /workspace/build/fastertransformer_backend/build
+ARG FORCE_BACKEND_REBUILD=0
+# TODO:cmake指定sm参数
+RUN cmake \
+      -DSM=60 \
+      -D CMAKE_EXPORT_COMPILE_COMMANDS=1 \
+      -D CMAKE_BUILD_TYPE=Release \
+      -D ENABLE_FP8=OFF \
+      -D CMAKE_INSTALL_PREFIX=/opt/tritonserver \
+      -D TRITON_COMMON_REPO_TAG="r${NVIDIA_TRITON_SERVER_VERSION}" \
+      -D TRITON_CORE_REPO_TAG="r${NVIDIA_TRITON_SERVER_VERSION}" \
+      -D TRITON_BACKEND_REPO_TAG="r${NVIDIA_TRITON_SERVER_VERSION}" \
+      ..
+RUN cd _deps/repo-ft-src/ && \
+    git log | head -n 3 2>&1 | tee /workspace/build/fastertransformer_backend/FT_version.txt && \
+    cd /workspace/build/fastertransformer_backend/build && \
+    make -j"$(grep -c ^processor /proc/cpuinfo)" install && \
+    rm /workspace/build/fastertransformer_backend/build/bin/*_example -rf && \
+    rm /workspace/build/fastertransformer_backend/build/lib/lib*Backend.so -rf
+
+ENV NCCL_LAUNCH_MODE=GROUP
+ENV WORKSPACE /workspace
+WORKDIR /workspace
+
+
+# RUN mkdir -p /export/App /export/Data /export/Domains /export/Logs /export/Shell /export/servers /export/data /export/home
+
+# ENV DEBIAN_FRONTEND noninteractive
+
+# RUN apt-get update && apt-get install --no-install-recommends -y \
+#     vim build-essential wget openssl libssl-dev openssh-client net-tools \
+#     bind9 bind9utils iproute2 cron libffi-dev ruby zlib1g-dev libbz2-dev \
+#     ncurses-dev sqlite sqlite3 libreadline-dev tk-dev libgdbm-dev libdb-dev libdb++-dev \
+#     libpcap-dev liblzma-dev libexpat1-dev libmpfr-dev libmpc-dev libjpeg-dev \
+#     language-pack-zh-hans python2 && rm -rf /var/lib/apt/lists/*
+
+# # set python2 as default (for logbook)
+# RUN /usr/bin/update-alternatives --install /usr/bin/python python /usr/bin/python2 1
+
+# # openssh
+# RUN /usr/bin/ssh-keygen -A && mkdir /var/run/sshd -p
+
+# # add zh_CN.utf8
+# RUN localedef -c -f UTF-8 -i zh_CN zh_CN.utf8
+# RUN echo "export LANG=zh_CN.UTF-8" >> /etc/locale.conf
+# ENV LANG zh_CN.UTF-8
+# ENV LC_ALL zh_CN.UTF-8
+
+# # set timezone
+# RUN apt-get update && apt-get install -y --no-install-recommends tzdata \
+#     && rm -rf /var/lib/apt/lists/*
+# RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+#     && dpkg-reconfigure --frontend noninteractive tzdata
+
+# RUN useradd -ms /bin/bash admin
+
+# COPY ./docker/resource/jdk1.8.0.zip /export/servers/
+# COPY ./docker/resource/start.sh /export/servers/
+# RUN chown -R admin:admin /export
+# USER admin
+
+# # install jdk
+# RUN cd /export/servers && unzip -q jdk1.8.0.zip && rm -rf jdk1.8.0.zip
+# ENV JAVA_HOME /export/servers/jdk1.8.0_202
+# ENV CLASSPATH /export/servers/jdk1.8.0_202/lib/
+# RUN chmod a+x /export/servers/start.sh
+
+# # logbook
+# COPY ./docker/resource/autodeploy_agent.tar.gz /export/servers/
+# RUN cd /export/servers && tar -zxvf autodeploy_agent.tar.gz && rm -rf autodeploy_agent.tar.gz
+
+# RUN mkdir -p /export/auto_deploy /export/Data/auto_deploy
+# WORKDIR /home/admin
+# RUN mkdir -p /export/App /export/Data /export/Domains /export/Logs /export/Shell /export/auto_deploy/public_shell/pid_monitor
+# RUN mkdir -p /export/servers /export/data /export/home /export/Data/autodeploy_agent/command /export/Data/autodeploy_agent/var
+# COPY ./docker/resource/pid_monitor /export/auto_deploy/public_shell/pid_monitor
+# COPY ./docker/resource/pid_monitor /export/Data/auto_deploy/pid_monitor
+# RUN mkdir -p /home/admin/.ssh
+# RUN chown -R admin:admin /home/admin/.ssh
+# COPY ./docker/resource/logbook-toolbox-installer-0.1.41.5d3497c.bin /export/servers
+# RUN chmod 0777 /export/servers/autodeploy_agent/bin/*.sh
+# # end logbook
+
+# USER root
+# ENTRYPOINT /bin/bash

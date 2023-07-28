@@ -1,0 +1,9 @@
+accelerate
+deepspeed
+sentencepiece
+bitsandbytes
+datasets
+fire
+zstandard
+peft
+transformers

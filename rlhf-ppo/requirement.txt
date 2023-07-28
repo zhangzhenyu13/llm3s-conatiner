@@ -1,0 +1,7 @@
+datasets
+sentencepiece
+protobuf==3.20.3
+accelerate
+torch
+deepspeed==0.8
+transformers

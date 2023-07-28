@@ -1,0 +1,21 @@
+{
+    "service-port": 6200,
+    "service-workers": 3,
+    "selected": "xx-org/bloomS2.1-FT",
+    "roled_model_ids" : {
+        "xx-org/bloomS2.1-FT": ["User", "Bot"],
+        "xx-org/chatrecV1-FT": []
+    },
+    "port": {
+        "xx-org/bloomS2.1-FT": 8501,
+        "xx-org/chatrecV1-FT": 8601
+    },
+    "host":{
+        "xx-org/bloomS2.1-FT": "localhost",
+        "xx-org/chatrecV1-FT": "localhost"
+    },
+    "system":{
+        "xx-org/bloomS2.1-FT": "You are a smart chatbot (Bot) of humans (User).\nyour answers need to useful and harmless.\n\n",
+        "xx-org/chatrecV1-FT": ""
+    }
+}

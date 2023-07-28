@@ -1,0 +1,5 @@
+# replace with real server(with N=4,8,etc. GPUs) ips here and then remove this line
+ip-serve1 slots=N
+ip-serve2 slots=N
+ip-serve3 slots=N
+ip-serve4 slots=N
