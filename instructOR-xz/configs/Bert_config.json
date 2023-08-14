@@ -1,0 +1,20 @@
+{
+    "model_type": "bert",
+    "model_name_or_path": "CommonModels/moka-ai/m3e-small/",
+    "data_path": "SharedData/instructOR-MEDI/pairs",
+    "output_dir": "SharedData/instructOR-encoders",
+    "dataset_type": "pair",
+    "pooling_strategy": "last_mean",
+    "temperature": 0.05,
+    "group_by_length": false,
+    "per_device_train_batch_size": 16,
+    "num_epochs": 1,
+    "learning_rate": 3e-6,
+    "cutoff_len": 512,
+    "save_steps": 500,
+    "warmup_ratio": 0.1,
+    "logging_steps":10,
+    "gradient_accumulation_steps":8,
+    "fp16": true
+}
+

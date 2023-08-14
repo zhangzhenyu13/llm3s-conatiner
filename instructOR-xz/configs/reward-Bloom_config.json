@@ -1,0 +1,17 @@
+{
+    "model_type": "bloom",
+    "model_name_or_path": "CommonModels/bigscience/bloomz-560m",
+    "data_path": "SharedData/Bloom7Bz/reward/train.json",
+    "output_dir": "SharedData/Bloom7Bz/reward-model_dir",
+    "group_by_length": false,
+    "per_device_train_batch_size": 1,
+    "num_epochs": 1,
+    "learning_rate": 2e-5,
+    "cutoff_len": 512,
+    "save_steps": 5000,
+    "warmup_ratio": 0.1,
+    "logging_steps":10,
+    "gradient_accumulation_steps":8,
+    "fp16": true
+}
+
