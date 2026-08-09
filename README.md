@@ -1,3 +1,6 @@
+
+</think>
+
 # Complete docs
 ### [detailed full doc for everything/完全体文档](`大模型“不完全”修炼手册——从训练、评测到应用搭建.pdf`)
 
@@ -8,6 +11,8 @@ then install others
 `pip install -r requirements.txt`
 
 ## deploy necessary settings
+
+Copy `deploy-demos/configs/server.json` to configure API and GUI ports (default API port is 7690).
 
 
 ## run train SFT model
@@ -33,4 +38,3 @@ refer `sft-data-construction`
 ## reward data and RLHF data
 
 refer `rlhf-ppo`
-
